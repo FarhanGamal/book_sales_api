@@ -145,7 +145,7 @@ class BookController extends Controller
          $book->update($data);
 
          return response()->json([
-             "succes" => false,
+             "succes" => true,
              "message" => "Resource updated succesfully!",
              "data" => $book
          ], 200);

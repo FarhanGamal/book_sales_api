@@ -3,30 +3,22 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\GenreResource;
-use App\Models\Genre;
+use App\Http\Resources\OrderResource;
+use App\Models\Book;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class GenreController extends Controller
+class OrderController extends Controller
 {
     public function index(){
-        $genres = Genre::all();
-            return new GenreResource(true,  "Get All Resourse", $genres);
-        
-        // $genres = Genre::all();
-
-        // if($genres->isEmpty()){
-        //     return response()->json([
-        //         "status" => true,
-        //         "message" => "Get All Resourse",
-        //     ], 200);
-        // };
-
+        $orders = Order::all();
+            return new OrderResource(true,  "Get All Resourse", $orders);
+            
         return response()->json([
             "status" => true,
             "message" => "Get All Resourse",
-            "Data" => $genres
+            "Data" => $orders
         ], 200);
     }
 
@@ -34,9 +26,11 @@ class GenreController extends Controller
 
         // membuat validasi
         $validator = Validator::make($request->all(), [
-            
-            "name" => "required|string",
-            "description" => "required|string"
+            "order_number" => "required|string",
+            "customer_id" => "required|exists:customers,id",
+            "book_id" => "required|exists:books,id",
+            "total_amount" => "required|numeric|min:0",
+            "status" => "required|in:'pending','processing','shipped','completed','canceled'",
         ]);
 
         // melakukan cek data yang bermasalah
@@ -48,28 +42,26 @@ class GenreController extends Controller
         }
 
         // membuat data genre
-        $genre = Genre::create([
-            "name" => $request->name,
-            "description" => $request->description
+        $order = Order::create([
+            "order_number" => $request->order_number,
+            "customer_id" => $request->customer_id,
+            "book_id" => $request->book_id,
+            "total_amount" => $request->stock,
+            "status" => $request->status(),
         ]);
 
         // memberi pesan berhasil
         return response()->json([
             "success" => true,
             "message" => "Resource added succesfully!",
-            "data" => $genre
+            "data" => $order
         ], 201);
     }
 
     public function show(string $id) {
-        $genre = Genre::find($id);
+        $order = Order::find($id);
 
-        // Task:
-        // tambahkan error handling ketika id yang dicari tidak ditemukan
-        // success = false
-        // message = "Resorce not found"
-        // error 404
-        if(!$genre){
+        if(!$order){
             return response()->json([
                 "status" => false,
                 "message" => "Resorce not found",
@@ -79,16 +71,15 @@ class GenreController extends Controller
         return response()->json([
             "success" => true,
             "message" => "Get detail resource",
-            "data" => $genre
+            "data" => $order
         ], 200);
     }
 
-
     public function update(Request $request, string $id) {
         // cari data genre
-        $genre = Genre::find($id);
+        $order = Order::find($id);
 
-        if (!$genre) {
+        if (!$order) {
           return response()->json([
             "success" => false,
             "message" => "Resource not found!"
@@ -97,8 +88,11 @@ class GenreController extends Controller
 
         // membuat validasi
         $validator = Validator::make($request->all(), [
-          "name" => "required|string",
-          "description" => "required|string"
+            "order_number" => "required|string",
+            "customer_id" => "required|exists:customers,id",
+            "book_id" => "required|exists:books,id",
+            "total_amount" => "required|numeric|min:0",
+            "status" => "required|in:'pending','processing','shipped','completed','canceled'"
         ]);
 
         // melakukan cek data yang bermasalah
@@ -109,31 +103,38 @@ class GenreController extends Controller
           ], 422);
         }
 
-        // $genre->update($request->only("name", "description"));
+        $book = Book::all();
+        $orderNumber = 'ORD-' . strtoupper(uniqid());
+        $totalAmount = $book->price * $request->quantity;
 
-        $genre->update([
-            "name" => $request->name,
-            "description" => $request->description
+        $order->update([
+            "order_number" => $request->$orderNumber,
+            "customer_id" => $request->customer_id,
+            "book_id" => $request->book_id,
+            "total_amount" => $request->$totalAmount,
+            "status" => $request->status(),
         ]);
+
+
 
         return response()->json([
           "success" => true,
           "message" => "Resource updated successfully!",
-          "data" => $genre
+          "data" => $order
         ], 200);
     }
 
     public function destroy (string $id) {
-        $genre = Genre::find($id);
+        $order = Order::find($id);
 
-        if (!$genre) {
+        if (!$order) {
             return response()->json([
                 "succes" => false,
                 "message" => "Resource not found!"
             ], 404);
         }
 
-        $genre->delete();
+        $order->delete();
 
         return response()->json([
             "success" => true,
