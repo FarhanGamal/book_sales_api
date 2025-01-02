@@ -17,7 +17,7 @@ class BookSeeder extends Seeder
             'title' => 'The Hobbit',
             'description' => 'Sang Hobbit adalah sebuah buku novel fantasi yang ditulis oleh J. R. R. Tolkien dengan alur cerita laksana dongeng. Buku ini pertama kali diterbitkan di Inggris pada 21 September 1937',
             'price' => '52000',
-            'stock' => '15',
+            'stock' => '50',
             'cover_photo' => 'Hobbit.png',
             'genre_id' => '1',
             'author_id' => '1'

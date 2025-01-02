@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             GenreSeeder::class,
             BookSeeder::class,
             OrderSeeder::class,
+            Payment_methodSeeder::class,
         ]);
     }
 }

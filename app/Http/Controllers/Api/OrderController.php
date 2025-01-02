@@ -24,16 +24,21 @@ class OrderController extends Controller
 
     public function store(Request $request) {
 
-        // membuat validasi
+        // 1. membuat validasi
         $validator = Validator::make($request->all(), [
-            "order_number" => "required|string",
-            "customer_id" => "required|exists:customers,id",
-            "book_id" => "required|exists:books,id",
-            "total_amount" => "required|numeric|min:0",
-            "status" => "required|in:'pending','processing','shipped','completed','canceled'",
+            // ini sebenarnya tidak perlu di tulis lagi karana kita hanya memanggil
+            // "order_number" => "required|string",
+            // "customer_id" => "required|exists:customers,id",
+            // "book_id" => "required|exists:books,id",
+            // "total_amount" => "required|numeric|min:0",
+            // "status" => "required|string",
+
+            'book_id' => 'required|exists:books,id',
+            'quantity' => 'required|integer|min:1'
+
         ]);
 
-        // melakukan cek data yang bermasalah
+        // 2. check validator
         if ($validator->fails()){
             return response()->json([
                 "success" => false,
@@ -41,13 +46,52 @@ class OrderController extends Controller
             ], 422);
         }
 
-        // membuat data genre
+        // Buat nomor order unik
+        $orderNumber = "ORD-" . strtoupper(uniqid());
+
+        // Ambil data user yang sedang login
+        $user = auth('api')->user();
+
+         // cek login user
+         if (!$user) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Unauthorize!'
+            ], 401);
+        }
+
+        // ambil 1 data buku
+        $book = Book::find($request->book_id);
+        
+        // cek stok barang
+        if ($book->stock < $request->quantity) {
+            return response()->json([
+                'status' => false,
+                'message' => 'stok barang tidak cukup'
+            ], 400);
+        }
+
+        // hitung total harga
+        $totalAmount = $book->price * $request->quantity;
+
+        // kurangi stok buku
+        $book->stock -= $request->quantity;
+        $book->save();
+
+
+        // 3. insert data
         $order = Order::create([
-            "order_number" => $request->order_number,
-            "customer_id" => $request->customer_id,
-            "book_id" => $request->book_id,
-            "total_amount" => $request->stock,
-            "status" => $request->status(),
+            // "order_number" => $request->order_number,
+            // "customer_id" => $request->customer_id,
+            // "book_id" => $request->book_id,
+            // "total_amount" => $request->stock,
+            // "status" => $request->status(),
+
+            'order_number' => $orderNumber,
+            'customer_id' => $user->id,
+            'book_id' => $request->book_id,
+            'total_amount' => $totalAmount,
+            'status' => 'pending',
         ]);
 
         // memberi pesan berhasil

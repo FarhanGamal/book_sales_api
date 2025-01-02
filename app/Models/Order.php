@@ -9,4 +9,8 @@ class Order extends Model
     protected $fillable = [
         'order_number', 'customer_id', 'book_id', 'total_amount', 'status'
     ];
+
+    // protected $guards = [
+    //     'id'
+    // ];
 }
