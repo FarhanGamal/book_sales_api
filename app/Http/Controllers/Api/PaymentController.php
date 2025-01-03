@@ -16,7 +16,7 @@ class PaymentController extends Controller
     public function index(){
         $payments = Payment::all();
             return new OrderResource(true,  "Get All Resourse", $payments);
-            
+
         return response()->json([
             "status" => true,
             "message" => "Get All Resourse",
@@ -28,11 +28,12 @@ class PaymentController extends Controller
 
         // 1. membuat validasi
         $validator = Validator::make($request->all(), [
-            'order_id' => 'Required|exists:orders,id', 
-            'payment_method_id' => 'Required|exists:payment_method,id', 
-            // 'amount'=> 'required|numeric|min:0', 
-            // 'status'=> 'required|string', 
-            // 'staff_confirmed_by' => 'required|integer', 
+            'order_id' => 'required|exists:orders,id',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+
+            // 'amount'=> 'required|numeric|min:0',
+            // 'status'=> 'required|string',
+            // 'staff_confirmed_by' => 'required|integer',
             // 'staff_confirmed_at'=> 'required|timestamp',
         ]);
 
@@ -44,35 +45,35 @@ class PaymentController extends Controller
             ], 422);
         }
 
-         // Ambil data user yang sedang login
-         $user = auth('api')->user();
+        //  // Ambil data user yang sedang login
+        //  $user = auth('api')->user();
 
-         // cek login user
-         if (!$user) {
-            return response()->json([
-                'status' => true,
-                'message' => 'Unauthorize!'
-            ], 401);
-        }
+        //  // cek login user
+        //  if (!$user) {
+        //     return response()->json([
+        //         'status' => true,
+        //         'message' => 'Unauthorize!'
+        //     ], 401);
+        // }
 
         // ambil data order
         $order = Order::find($request->order_id);
-        $payment_method = Payment_method::find($request->payment_method_id);
 
         // ambil data amount
-        $Amount = $order->totalAmount;
+        $amount = $order->total_amount;
+        // dd($amount);
 
-        // 3. membuat data genre
+        // 3. membuat data payment
         $payment = Payment::create([
-            'order_id' => $order, 
-            'payment_method_id' => $payment_method, 
-            'amount'=> $Amount, 
-            'status'=> 'pending', 
-            'staff_confirmed_by' => $request->staff_confirmed_by, 
-            'staff_confirmed_at'=> $request->nstaff_confirmed_at,
+            'order_id' => $request->order_id,
+            'payment_method_id' => $request->payment_method_id,
+            'amount'=> $amount,
+            'status'=> 'pending',
+            // 'staff_confirmed_by' => $request->staff_confirmed_by,
+            // 'staff_confirmed_at'=> $request->nstaff_confirmed_at,
         ]);
 
-        // 4. memberi pesan berhasil
+        // // 4. memberi pesan berhasil
         return response()->json([
             "success" => true,
             "message" => "Resource added succesfully!",
@@ -98,7 +99,7 @@ class PaymentController extends Controller
     }
 
     public function update(Request $request, string $id) {
-        // cari data payment
+        // 1. cari data payment
         $payment = Payment::find($id);
 
         if (!$payment) {
@@ -108,17 +109,14 @@ class PaymentController extends Controller
           ], 404);
         }
 
-        // membuat validasi
+        // 2. membuat validasi
         $validator = Validator::make($request->all(), [
-          'order_id' => 'Required|exists:orders,id', 
-            'payment_method_id' => 'Required|exists:payment_method,id', 
-            'amount'=> 'required|numeric|min:0', 
-            'status'=> 'required|string', 
-            'staff_confirmed_by' => 'required|integer', 
-            'staff_confirmed_at'=> 'required|timestamp',
+            'order_id' => 'required|exists:orders,id',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'status'=> 'required|string',
         ]);
 
-        // melakukan cek data yang bermasalah
+        // 3. melakukan cek data yang bermasalah
         if ($validator->fails()){
           return response()->json([
             "success" => false,
@@ -126,15 +124,13 @@ class PaymentController extends Controller
           ], 422);
         }
 
-        // $genre->update($request->only("name", "description"));
+        // ambil data order
+        $order = Order::find($request->order_id);
 
-        $payment->update([
-            'order_id' => $request->order_id, 
-            'payment_method_id' => $request->payment_method_id, 
-            'amount'=> $request->amount, 
-            'status'=> $request->nstatusme, 
-            'staff_confirmed_by' => $request->staff_confirmed_by, 
-            'staff_confirmed_at'=> $request->nstaff_confirmed_atame,
+        $order->update([
+            'order_id' => $request->order_id,
+            'payment_method_id' => $request->payment_method_id,
+            'status'=> 'pending',
         ]);
 
         return response()->json([

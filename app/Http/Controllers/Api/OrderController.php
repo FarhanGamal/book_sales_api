@@ -14,7 +14,7 @@ class OrderController extends Controller
     public function index(){
         $orders = Order::all();
             return new OrderResource(true,  "Get All Resourse", $orders);
-            
+
         return response()->json([
             "status" => true,
             "message" => "Get All Resourse",
@@ -62,7 +62,7 @@ class OrderController extends Controller
 
         // ambil 1 data buku
         $book = Book::find($request->book_id);
-        
+
         // cek stok barang
         if ($book->stock < $request->quantity) {
             return response()->json([

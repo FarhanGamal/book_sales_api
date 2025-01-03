@@ -31,7 +31,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::apiResource('/payment_methods', Payment_methodController::class);
     });
 
-    
+
 
     Route::middleware(['role:staff'])->group(function () {
         Route::apiResource('/payments', PaymentController::class)->only(['update']);
@@ -41,8 +41,10 @@ Route::middleware(['auth:api'])->group(function () {
     });
     Route::middleware(['role:customer'])->group(function () {
         Route::apiResource('/payments', PaymentController::class)->only(['store']);
-        Route::apiResource('/payment_methods', Payment_methodController::class)->only(['index', 'show']);
     });
+
+    Route::apiResource('/payment_methods', Payment_methodController::class)->only(['index', 'show']);
+    Route::apiResource('/payments', PaymentController::class)->only(['index', 'show',]);
 });
 
 
@@ -59,7 +61,7 @@ Route::apiResource('/orders', OrderController::class);
 // return strtoupper(uniqid());  ini untuk membuat huruf besar semuah
 // return "ORD-" . strtoupper(uniqid()); ini agar kode lebih unik dimana di bagian depan kode ada ORD-
 Route::get('/tes', function () {
-    return "ORD-" . strtoupper(uniqid()); 
+    return "ORD-" . strtoupper(uniqid());
 });
 
 
