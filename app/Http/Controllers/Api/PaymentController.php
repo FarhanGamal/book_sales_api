@@ -23,7 +23,7 @@ class PaymentController extends Controller
             "Data" => $payments
         ], 200);
     }
-
+//===================================================================================
     public function store(Request $request) {
 
         // 1. membuat validasi
@@ -80,7 +80,7 @@ class PaymentController extends Controller
             "data" => $payment
         ], 201);
     }
-
+//===================================================================================
     public function show(string $id) {
         $payment = Payment::find($id);
 
@@ -97,7 +97,7 @@ class PaymentController extends Controller
             "data" => $payment
         ], 200);
     }
-
+//===================================================================================
     public function update(Request $request, string $id) {
         // 1. cari data payment
         $payment = Payment::find($id);
@@ -111,8 +111,6 @@ class PaymentController extends Controller
 
         // 2. membuat validasi
         $validator = Validator::make($request->all(), [
-            'order_id' => 'required|exists:orders,id',
-            'payment_method_id' => 'required|exists:payment_methods,id',
             'status'=> 'required|string',
         ]);
 
@@ -125,12 +123,12 @@ class PaymentController extends Controller
         }
 
         // ambil data order
-        $order = Order::find($request->order_id);
 
-        $order->update([
-            'order_id' => $request->order_id,
-            'payment_method_id' => $request->payment_method_id,
-            'status'=> 'pending',
+
+        $payment->update([
+            'status'=> $request->status,
+            'staff_confirmed_by' => auth('api')->user()->name,
+            'staff_confirmed_at'=> now(),
         ]);
 
         return response()->json([
@@ -139,7 +137,7 @@ class PaymentController extends Controller
           "data" => $payment
         ], 200);
     }
-
+//===================================================================================
     public function destroy (string $id) {
         $payment = Payment::find($id);
 
