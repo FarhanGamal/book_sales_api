@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Payment_methodResource;
 use App\Models\Payment_method;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class Payment_methodController extends Controller
@@ -13,7 +14,7 @@ class Payment_methodController extends Controller
     public function index(){
         $payment_methods = Payment_method::all();
             return new Payment_methodResource(true,  "Get All Resourse", $payment_methods);
-            
+
         return response()->json([
             "status" => true,
             "message" => "Get All Resourse",
@@ -25,8 +26,8 @@ class Payment_methodController extends Controller
 
         // membuat validasi
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string', 
-            'account_number' => 'required|integer', 
+            'name' => 'required|string',
+            'account_number' => 'required|integer',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -38,11 +39,14 @@ class Payment_methodController extends Controller
             ], 422);
         }
 
+        $image = $request->file('image');
+        $image->store('payment_methods', 'public');
+
         // membuat data genre
         $payment_method = Payment_method::create([
-            'name' => $request->name, 
-            'account_number' =>  $request->account_number, 
-            'image' =>  $request->image,
+            'name' => $request->name,
+            'account_number' =>  $request->account_number,
+            'image' =>  $image->hashName(),
         ]);
 
         // memberi pesan berhasil
@@ -83,8 +87,8 @@ class Payment_methodController extends Controller
 
         // membuat validasi
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string', 
-            'account_number' => 'required|integer', 
+            'name' => 'required|string',
+            'account_number' => 'required|integer',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -99,10 +103,25 @@ class Payment_methodController extends Controller
         // $genre->update($request->only("name", "description"));
 
         $payment_method->update([
-            'name' => $request->name, 
-            'account_number' =>  $request->account_number, 
-            'image' =>  $request->image,
+            'name' => $request->name,
+            'account_number' =>  $request->account_number,
         ]);
+
+
+        // ....upload image
+        if ($request->hasFile('image')){
+            $image = $request->file('image');
+            $image->store('payments_methods', 'public');
+
+            if ($payment_method->image) {
+                Storage::disk('public')->delete('payments_methods/' . $payment_method->image);
+            }
+
+            $data['image'] = $image->hashName();
+        }
+
+         //update data baru
+         $payment_method->update($data);
 
         return response()->json([
           "success" => true,

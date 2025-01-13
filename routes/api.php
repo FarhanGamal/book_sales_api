@@ -24,11 +24,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/user', fn(Request $request) => $request->user());  // ->id untuk mengambil id saja
 
     Route::middleware(['role:admin,staff'])->group(function () {
-        Route::apiResource('/books', BookController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('/genres', GenreController::class)->only(['store', 'update', 'destroy']);
-        Route::apiResource('/authors', AuthorController::class)->only(['store', 'update', 'destroy']);
+        // Route::apiResource('/books', BookController::class)->only(['store', 'update', 'destroy']);
+        // Route::apiResource('/genres', GenreController::class)->only(['store', 'update', 'destroy']);
+        // Route::apiResource('/authors', AuthorController::class)->only(['store', 'update', 'destroy']);
         Route::apiResource('/payments', PaymentController::class)->only(['index', 'show']);
-        Route::apiResource('/payment_methods', Payment_methodController::class);
+        // Route::apiResource('/payment_methods', Payment_methodController::class);
     });
 
 
@@ -48,10 +48,15 @@ Route::middleware(['auth:api'])->group(function () {
 });
 
 
-Route::apiResource('/books', BookController::class)->only(['index', 'show']);
-Route::apiResource('/genres', GenreController::class)->only(['index', 'show']);
-Route::apiResource('/authors', AuthorController::class)->only(['index', 'show']);
+Route::apiResource('/books', BookController::class)->only(['index', 'show']); // asli
+Route::apiResource('/books', BookController::class); // sementara
+Route::apiResource('/genres', GenreController::class)->only(['index', 'show']); // asli
+Route::apiResource('/genres', GenreController::class); // sementara
+Route::apiResource('/authors', AuthorController::class)->only(['index', 'show']); // asli
+Route::apiResource('/authors', AuthorController::class); // sementara
 Route::apiResource('/orders', OrderController::class);
+
+Route::apiResource('/payment_methods', Payment_methodController::class); // sementara
 
 
 

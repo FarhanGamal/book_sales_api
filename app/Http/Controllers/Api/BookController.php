@@ -15,7 +15,7 @@ class BookController extends Controller
     public function index(){
         $books = Book::all();
             return new BookResource(true,  "Get All Resourse", $books);
-            
+
         // $books = Book::all();
         // if($books->isEmpty()){
         //     return response()->json([
@@ -23,12 +23,6 @@ class BookController extends Controller
         //         "message" => "Get All Resourse",
         //     ], 200);
         // };
-
-        return response()->json([
-            "status" => true,
-            "message" => "Get All Resourse",
-            "Data" => $books
-        ], 200);
     }
 
     public function store(Request $request) {
@@ -110,7 +104,7 @@ class BookController extends Controller
             "genre_id" => "required|exists:genres,id",  // bagian genres,id (bagian ,id harus nyambung)
             "author_id" => "required|exists:authors,id"
             ]);
-    
+
             if ($validator->fails()) {
                 return response()->json([
                     "succes" => false,
@@ -126,7 +120,7 @@ class BookController extends Controller
             "stock" => $request->stock,
             "genre_id" => $request->genre_id,
             "author_id" => $request->author_id
-           
+
         ];
 
          // ....upload image
